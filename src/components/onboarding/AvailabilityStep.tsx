@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Clock, Copy, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { BlurText } from "@/components/ui/blur-text";
 import { CountUp } from "@/components/ui/count-up";
 import { cn } from "@/lib/utils";
-import type { WeekSchedule } from "./constants";
+import { DAYS, type DayKey, type WeekSchedule } from "./constants";
+import { StepHeader } from "./StepHeader";
 
 interface AvailabilityStepProps {
   sched: WeekSchedule;
@@ -13,44 +13,47 @@ interface AvailabilityStepProps {
 }
 
 export function AvailabilityStep({ sched, set }: AvailabilityStepProps) {
-  const days = Object.keys(sched);
-  const [copied, setCopied] = useState<string | null>(null);
+  const [copied, setCopied] = useState<DayKey | null>(null);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  const toggle = (d: string) =>
+  useEffect(() => {
+    return () => {
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    };
+  }, []);
+
+  const toggle = (d: DayKey) =>
     set({ ...sched, [d]: { ...sched[d], on: !sched[d].on } });
 
-  const setTime = (d: string, k: "open" | "close", v: string) =>
+  const setTime = (d: DayKey, k: "open" | "close", v: string) =>
     set({ ...sched, [d]: { ...sched[d], [k]: v } });
 
-  const copyAll = (src: string) => {
+  const copyAll = (src: DayKey) => {
     const s = sched[src];
-    const u: WeekSchedule = {};
-    days.forEach((d) => {
-      u[d] =
-        d !== src && sched[d].on
-          ? { ...sched[d], open: s.open, close: s.close }
-          : sched[d];
+    const u = { ...sched };
+    DAYS.forEach((d) => {
+      if (d !== src && sched[d].on) {
+        u[d] = { ...sched[d], open: s.open, close: s.close };
+      }
     });
     set(u);
     setCopied(src);
-    setTimeout(() => setCopied(null), 1400);
+    if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    copiedTimer.current = setTimeout(() => setCopied(null), 1400);
   };
 
-  const openCount = days.filter((d) => sched[d].on).length;
+  const openCount = DAYS.filter((d) => sched[d].on).length;
 
   return (
     <div className="flex flex-col gap-5">
-      <div>
-        <h2 className="font-serif text-[26px] text-foreground m-0">
-          <BlurText text="When are you open?" delay={70} />
-        </h2>
-        <p className="text-muted-foreground text-[15px] mt-2 leading-relaxed opacity-0 animate-[slide-up-fade_0.5s_ease_0.3s_forwards]">
-          Set your working hours so the AI only books when you're available.
-        </p>
-      </div>
+      <StepHeader
+        title="When are you open?"
+        subtitle="Set your working hours so the AI only books when you're available."
+        blurDelay={70}
+      />
 
       <div className="flex flex-col gap-1.5">
-        {days.map((day, idx) => {
+        {DAYS.map((day, idx) => {
           const d = sched[day];
           return (
             <div
@@ -67,7 +70,11 @@ export function AvailabilityStep({ sched, set }: AvailabilityStepProps) {
               }}
             >
               <div className="flex items-center gap-2.5">
-                <Switch checked={d.on} onCheckedChange={() => toggle(day)} />
+                <Switch
+                  checked={d.on}
+                  onCheckedChange={() => toggle(day)}
+                  aria-label={`Toggle ${day}`}
+                />
                 <span
                   className={cn(
                     "font-semibold text-sm transition-colors duration-300",
@@ -85,13 +92,15 @@ export function AvailabilityStep({ sched, set }: AvailabilityStepProps) {
                     value={d.open}
                     onChange={(e) => setTime(day, "open", e.target.value)}
                     className="w-[110px] h-8 text-sm"
+                    aria-label={`${day} opening time`}
                   />
-                  <span className="text-[13px] text-muted-foreground">to</span>
+                  <span className="text-[13px] text-muted-foreground" aria-hidden="true">to</span>
                   <Input
                     type="time"
                     value={d.close}
                     onChange={(e) => setTime(day, "close", e.target.value)}
                     className="w-[110px] h-8 text-sm"
+                    aria-label={`${day} closing time`}
                   />
                 </div>
               ) : (
@@ -103,7 +112,7 @@ export function AvailabilityStep({ sched, set }: AvailabilityStepProps) {
               {d.on ? (
                 <button
                   onClick={() => copyAll(day)}
-                  title="Copy hours to all open days"
+                  aria-label={`Copy ${day} hours to all open days`}
                   className={cn(
                     "p-1.5 rounded-md flex items-center transition-all duration-300 cursor-pointer border-none",
                     copied === day
@@ -126,7 +135,7 @@ export function AvailabilityStep({ sched, set }: AvailabilityStepProps) {
       </div>
 
       <div className="flex items-center gap-2 py-3 px-4 bg-[var(--color-surface)] rounded-[10px] opacity-0 animate-[slide-up-fade_0.5s_ease_0.4s_forwards]">
-        <Clock size={16} className="text-muted-foreground" />
+        <Clock size={16} className="text-muted-foreground" aria-hidden="true" />
         <span className="text-[13px] text-muted-foreground">
           Open{" "}
           <strong className="text-foreground">

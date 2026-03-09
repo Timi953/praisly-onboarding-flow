@@ -8,13 +8,13 @@ interface StepsProps {
 
 export function Steps({ current, labels }: StepsProps) {
   return (
-    <div className="flex items-center w-full animate-[slide-up-fade_0.5s_ease]">
+    <nav className="flex items-center w-full animate-[slide-up-fade_0.5s_ease]" aria-label="Progress">
       {labels.map((label, i) => {
         const done = i < current;
         const active = i === current;
 
         return (
-          <div key={i} className="flex items-center flex-1">
+          <div key={i} className="flex items-center flex-1" aria-current={active ? "step" : undefined}>
             <div className="flex flex-col items-center min-w-[34px]">
               <div
                 className={cn(
@@ -47,6 +47,6 @@ export function Steps({ current, labels }: StepsProps) {
           </div>
         );
       })}
-    </div>
+    </nav>
   );
 }

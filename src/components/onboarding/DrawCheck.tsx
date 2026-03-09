@@ -2,9 +2,10 @@ interface DrawCheckProps {
   size?: number;
   color?: string;
   delay?: number;
+  label?: string;
 }
 
-export function DrawCheck({ size = 14, color = "#fff", delay = 0 }: DrawCheckProps) {
+export function DrawCheck({ size = 14, color = "#fff", delay = 0, label }: DrawCheckProps) {
   return (
     <svg
       width={size}
@@ -15,6 +16,9 @@ export function DrawCheck({ size = 14, color = "#fff", delay = 0 }: DrawCheckPro
       strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden={!label}
+      role={label ? "img" : undefined}
+      aria-label={label}
     >
       <path
         d="M20 6L9 17l-5-5"

@@ -1,13 +1,9 @@
+import { useMemo } from "react";
+
 const COLORS = ["#D4754E", "#B85C38", "#5B8C5A", "#E8B931", "#E86A50", "#7EB8DA", "#F4A261"];
 
-interface ConfettiProps {
-  active: boolean;
-}
-
-export function Confetti({ active }: ConfettiProps) {
-  if (!active) return null;
-
-  const pieces = Array.from({ length: 50 }, (_, i) => ({
+function generatePieces() {
+  return Array.from({ length: 50 }, (_, i) => ({
     id: i,
     color: COLORS[i % COLORS.length],
     left: `${Math.random() * 100}%`,
@@ -17,9 +13,19 @@ export function Confetti({ active }: ConfettiProps) {
     rotation: Math.random() * 360,
     shape: Math.random() > 0.5 ? "50%" : "2px",
   }));
+}
+
+interface ConfettiProps {
+  active: boolean;
+}
+
+export function Confetti({ active }: ConfettiProps) {
+  const pieces = useMemo(() => (active ? generatePieces() : []), [active]);
+
+  if (!active) return null;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[999] overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-[999] overflow-hidden" aria-hidden="true">
       {pieces.map((p) => (
         <div
           key={p.id}

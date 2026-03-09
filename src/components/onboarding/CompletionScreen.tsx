@@ -14,7 +14,7 @@ export function CompletionScreen({ bizName, showConfetti }: CompletionScreenProp
       <Confetti active={showConfetti} />
       <div className="text-center p-10 animate-[slide-up-fade_0.6s_ease] relative z-[1]">
         <div className="w-[84px] h-[84px] rounded-full bg-[var(--color-success-bg)] flex items-center justify-center mx-auto mb-6 animate-[scale-bounce_0.6s_ease]">
-          <DrawCheck size={38} color="var(--color-success)" delay={300} />
+          <DrawCheck size={38} color="var(--color-success)" delay={300} label="Setup complete" />
         </div>
         <h1 className="font-serif text-[30px] text-foreground mb-2.5">
           <BlurText text="You're all set!" delay={100} />

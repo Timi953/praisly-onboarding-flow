@@ -1,15 +1,33 @@
+import {
+  Scissors, Hotel, Stethoscope, Dumbbell,
+  UtensilsCrossed, Briefcase,
+  type LucideIcon,
+} from "lucide-react";
+
+// ─── Type-safe unions ────────────────────────────────────────
+
+export type BusinessTypeId = "salon" | "hotel" | "clinic" | "gym" | "restaurant" | "other";
+
+export type IconName = "Scissors" | "Hotel" | "Stethoscope" | "Dumbbell" | "UtensilsCrossed" | "Briefcase";
+
+export type DayKey = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
+
+export const DAYS: DayKey[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+// ─── Data types ──────────────────────────────────────────────
+
 export interface Service {
   name: string;
   duration: number;
   price: number;
-  id?: number;
+  id: number;
 }
 
 export interface BusinessType {
-  id: string;
+  id: BusinessTypeId;
   label: string;
-  icon: string;
-  services: Service[];
+  icon: IconName;
+  services: Omit<Service, "id">[];
 }
 
 export interface DaySchedule {
@@ -18,13 +36,26 @@ export interface DaySchedule {
   close: string;
 }
 
-export type WeekSchedule = Record<string, DaySchedule>;
+export type WeekSchedule = Record<DayKey, DaySchedule>;
 
 export interface BusinessData {
   name: string;
-  type: string;
+  type: BusinessTypeId | "";
   desc: string;
 }
+
+// ─── Icon map ────────────────────────────────────────────────
+
+export const iconMap: Record<IconName, LucideIcon> = {
+  Scissors,
+  Hotel,
+  Stethoscope,
+  Dumbbell,
+  UtensilsCrossed,
+  Briefcase,
+};
+
+// ─── Business types data ─────────────────────────────────────
 
 export const businessTypes: BusinessType[] = [
   {
@@ -90,6 +121,14 @@ export const businessTypes: BusinessType[] = [
   },
 ];
 
+// ─── Helpers ─────────────────────────────────────────────────
+
+export function getBusinessType(id: string) {
+  return businessTypes.find((t) => t.id === id);
+}
+
+// ─── Schedule defaults ───────────────────────────────────────
+
 export const defaultWeek: WeekSchedule = {
   Mon: { on: true, open: "09:00", close: "18:00" },
   Tue: { on: true, open: "09:00", close: "18:00" },
@@ -100,4 +139,11 @@ export const defaultWeek: WeekSchedule = {
   Sun: { on: false, open: "", close: "" },
 };
 
+// ─── Shared constants ────────────────────────────────────────
+
 export const STEP_LABELS = ["Business", "Services", "Hours", "Review"];
+
+export const SECTION_LABEL_CLASS =
+  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5";
+
+export const SERVICE_HEADERS = ["Service", "Duration", "Price", ""] as const;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,13 @@ import {
   type WeekSchedule,
 } from "./constants";
 
+const LOGO_STYLE: React.CSSProperties = {
+  background: `linear-gradient(90deg, var(--color-brand) 0%, var(--color-brand-dark) 40%, var(--color-brand) 60%, var(--color-brand-dark) 100%)`,
+  backgroundSize: "200% auto",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+};
+
 export default function PraislyOnboarding() {
   const [step, setStep] = useState(0);
   const [biz, setBiz] = useState<BusinessData>({ name: "", type: "", desc: "" });
@@ -23,7 +30,13 @@ export default function PraislyOnboarding() {
   const [sched, setSched] = useState<WeekSchedule>(defaultWeek);
   const [done, setDone] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [stepKey, setStepKey] = useState(0);
+  const confettiTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => {
+      if (confettiTimer.current) clearTimeout(confettiTimer.current);
+    };
+  }, []);
 
   const ok = () => {
     if (step === 0) return biz.name.trim() && biz.type;
@@ -32,36 +45,23 @@ export default function PraislyOnboarding() {
     return true;
   };
 
-  const goTo = (s: number) => {
-    setStep(s);
-    setStepKey((k) => k + 1);
-  };
-
   const finish = () => {
     setShowConfetti(true);
     setDone(true);
-    setTimeout(() => setShowConfetti(false), 4000);
+    confettiTimer.current = setTimeout(() => setShowConfetti(false), 4000);
   };
 
   if (done) {
-    return (
-      <CompletionScreen bizName={biz.name} showConfetti={showConfetti} />
-    );
+    return <CompletionScreen bizName={biz.name} showConfetti={showConfetti} />;
   }
 
   const isValid = ok();
 
   return (
     <div className="min-h-screen bg-[var(--color-warm-bg)] flex flex-col items-center px-4 pt-7 pb-12">
-      {/* Logo with shimmer */}
       <h1
         className="font-serif text-[22px] mb-1.5 tracking-tight animate-[shimmer_3s_linear_infinite]"
-        style={{
-          background: `linear-gradient(90deg, var(--color-brand) 0%, var(--color-brand-dark) 40%, var(--color-brand) 60%, var(--color-brand-dark) 100%)`,
-          backgroundSize: "200% auto",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
+        style={LOGO_STYLE}
       >
         praisly
       </h1>
@@ -69,15 +69,10 @@ export default function PraislyOnboarding() {
       <div className="w-full max-w-[540px] flex flex-col gap-6">
         <Steps current={step} labels={STEP_LABELS} />
 
-        {/* Step content with slide animation */}
-        <div key={stepKey} className="animate-[slide-in-right_0.35s_ease]">
+        <div key={step} className="animate-[slide-in-right_0.35s_ease]">
           {step === 0 && <BusinessStep data={biz} set={setBiz} />}
           {step === 1 && (
-            <ServicesStep
-              services={services}
-              set={setServices}
-              bizType={biz.type}
-            />
+            <ServicesStep services={services} set={setServices} bizType={biz.type} />
           )}
           {step === 2 && <AvailabilityStep sched={sched} set={setSched} />}
           {step === 3 && (
@@ -85,12 +80,11 @@ export default function PraislyOnboarding() {
           )}
         </div>
 
-        {/* Navigation */}
-        <div className="flex justify-between items-center">
+        <nav className="flex justify-between items-center" aria-label="Wizard navigation">
           {step > 0 ? (
             <Button
               variant="ghost"
-              onClick={() => goTo(step - 1)}
+              onClick={() => setStep(step - 1)}
               className="text-muted-foreground hover:text-foreground hover:-translate-x-0.5 transition-all"
             >
               <ChevronLeft size={16} />
@@ -101,7 +95,7 @@ export default function PraislyOnboarding() {
           )}
 
           <Button
-            onClick={() => (step === 3 ? finish() : goTo(step + 1))}
+            onClick={() => (step === 3 ? finish() : setStep(step + 1))}
             disabled={!isValid}
             size="default"
             className={cn(
@@ -114,7 +108,7 @@ export default function PraislyOnboarding() {
             {step === 3 ? "Launch Assistant" : "Continue"}
             {step < 3 && <ChevronRight size={16} />}
           </Button>
-        </div>
+        </nav>
       </div>
     </div>
   );
