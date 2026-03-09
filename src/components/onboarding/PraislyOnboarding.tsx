@@ -30,7 +30,7 @@ export default function PraislyOnboarding() {
   const [sched, setSched] = useState<WeekSchedule>(defaultWeek);
   const [done, setDone] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const confettiTimer = useRef<ReturnType<typeof setTimeout>>();
+  const confettiTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     return () => {

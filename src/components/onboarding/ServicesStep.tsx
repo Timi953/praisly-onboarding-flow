@@ -19,7 +19,7 @@ export function ServicesStep({ services, set, bizType }: ServicesStepProps) {
   const tpl = getBusinessType(bizType)?.services || [];
   const [showTpl, setShowTpl] = useState(services.length === 0 && tpl.length > 0);
   const [justAdded, setJustAdded] = useState<number | null>(null);
-  const justAddedTimer = useRef<ReturnType<typeof setTimeout>>();
+  const justAddedTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     return () => {
