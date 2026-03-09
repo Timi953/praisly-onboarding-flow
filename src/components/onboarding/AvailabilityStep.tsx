@@ -14,7 +14,7 @@ interface AvailabilityStepProps {
 
 export function AvailabilityStep({ sched, set }: AvailabilityStepProps) {
   const [copied, setCopied] = useState<DayKey | null>(null);
-  const copiedTimer = useRef<ReturnType<typeof setTimeout>>();
+  const copiedTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     return () => {
